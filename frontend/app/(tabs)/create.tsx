@@ -81,7 +81,7 @@ export default function Create() {
     comments: [],
     creation_date: '',
     description: '',
-    likes: [],
+    likes: 0,
     location: '',
     pictures: [],
     username: username,
@@ -92,7 +92,7 @@ export default function Create() {
     comments: [],
     creation_date: '',
     description: '',
-    likes: [],
+    likes: 0,
     location: '',
     ingredients: '',
     steps: '',
@@ -170,7 +170,7 @@ export default function Create() {
       mutate(postData);
     } catch (err) {
       // error
-      throw new Error(err.message);
+      throw new Error(error.message);
     }
   };
 

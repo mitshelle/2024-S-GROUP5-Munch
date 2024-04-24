@@ -4,6 +4,7 @@ import sys
 # Append parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+
 import unittest
 import status
 from server import app
@@ -40,7 +41,7 @@ class TestAPI(unittest.TestCase):
             ],
             "creation_date": "2024-03-20 21:41:30.786000+00:00",
             "description": "This is my first post!",
-            "likes": [],
+            "likes": 0,
             "location": "36.1048299,-115.1454664",
             "pictures": [],
             "username": "test_user",
@@ -72,7 +73,7 @@ class TestAPI(unittest.TestCase):
             ],
             "creation_date": "2024-03-20 21:41:30.786000+00:00",
             "description": "This is my first post and I just edited it!",
-            "likes": [],
+            "likes": 0,
             "location": "36.1048299,-115.1454664",
             "pictures": [],
             "username": "test_user",
@@ -110,7 +111,7 @@ class TestAPI(unittest.TestCase):
             ],
             "creation_date": "2024-03-20 21:41:30.786000+00:00",
             "description": "This is my first post and I just edited it!",
-            "likes": [],
+            "likes": 0,
             "pictures": [],
             "username": "test_user",
         }

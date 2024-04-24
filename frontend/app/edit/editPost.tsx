@@ -39,7 +39,7 @@ interface PostProps {
   post: Byte | Recipe;
 }
 
-export function EditPostDialog({ post }: FC<PostProps>) {
+export function EditPost({ post }: FC<PostProps>) {
   LogBox.ignoreLogs(['??']);
 
   const { token } = useContext(UserContext);
@@ -102,9 +102,7 @@ export function EditPostDialog({ post }: FC<PostProps>) {
     <>
       <Dialog modal>
         <Dialog.Trigger asChild>
-          <Button bordered minWidth='$14'>
-            Edit
-          </Button>
+          <Button>Edit</Button>
         </Dialog.Trigger>
 
         <Adapt when='sm' platform='touch'>

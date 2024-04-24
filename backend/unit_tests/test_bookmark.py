@@ -39,7 +39,7 @@ class BookmarkTest(TestCase):
             ],
             "creation_date": "2024-03-20 21:41:30.786000+00:00",
             "description": "Bookmark Unit Test Post",
-            "likes": [],
+            "likes": 0,
             "location": "36.1048299,-115.1454664",
             "pictures": [],
             "username": "test_user",
@@ -116,7 +116,7 @@ class BookmarkTest(TestCase):
             ],
             "creation_date": "2024-03-20 21:41:30.786000+00:00",
             "description": "Bookmark Unit Test Recipe",
-            "likes": [],
+            "likes": 0,
             "ingredients": [],
             "pictures": [],
             "steps": [],
@@ -157,5 +157,4 @@ class BookmarkTest(TestCase):
 
         # delete the mock recipe
         delete = self.client.delete(f"/api/{recipe_id}")
-        delete = self.client.delete(f"/api/users/{testing_user_id}")
         self.assertEqual(delete.status_code, status.HTTP_200_OK)

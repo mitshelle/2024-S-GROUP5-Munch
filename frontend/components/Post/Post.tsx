@@ -3,18 +3,16 @@ import { Byte, Recipe } from '@/types/post';
 import { getDateDifference } from '@/utils/getCurrentDateTime';
 import { isByte, isRecipe } from '@/utils/typeGuard';
 import { Link, useRouter } from 'expo-router';
-import React, { FC, useContext, useEffect, useRef, useState } from 'react';
+import React, { FC, useContext, useState } from 'react';
 import { Dimensions, Linking, Platform, SafeAreaView } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
-import { Button, Image, Text, XStack, YStack } from 'tamagui';
+import { Image, Text, XStack, YStack } from 'tamagui';
 import ButtonIcon from './ButtonIcon';
-import DeletePostDialog from './DeletePostDialog';
-import { EditPostDialog } from './EditPostDialog';
+import { EditPost } from '@/app/edit/editPost';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserContext } from '@/contexts/UserContext';
 import { useAuth } from '@clerk/clerk-expo';
 import axios from 'axios';
-import { AntDesign } from '@expo/vector-icons';
 
 interface PostProps {
   post: Byte | Recipe;
@@ -45,20 +43,12 @@ const Post: FC<PostProps> = ({ post }) => {
 
   // Used to query and mutate
   const queryClient = useQueryClient();
-  const { token, user_data } = useContext(UserContext);
+  const { token } = useContext(UserContext);
   const { getToken, userId } = useAuth();
   const postId = key.split('/')[1];
-
-  // Used to skip events on the first render
-  const isFirstRender = useRef(false);
-  useEffect(() => {
-    isFirstRender.current = true;
-  }, []);
-
+  //const postId = "eh07WeBEtSR2OIILJuj5"
   // Like button state
-  const [liked, setLiked] = useState(user_data.likes.includes(key));
-  // Only update the like count locally to reduce API calls
-  const [localLikes, setLocalLikes] = useState(likes);
+  const [liked, setLiked] = useState(true);
 
   // Data that will be passed in order to change the post's likes
   const likeData = {
@@ -75,6 +65,7 @@ const Post: FC<PostProps> = ({ post }) => {
     );
     return response.data.likes;
   };
+
   const {
     data: likesCount,
     error: likesError,
@@ -110,11 +101,9 @@ const Post: FC<PostProps> = ({ post }) => {
       );
       return response.data;
     },
+    // Update the like count
     onSuccess: () => {
-      // Update the local like count
-      setLocalLikes(liked ? localLikes + 1 : localLikes - 1);
-      // Update the like count
-      //queryClient.invalidateQueries({ queryKey: ['likes'] });
+      queryClient.invalidateQueries({ queryKey: ['likes'] });
     },
     // Show error message in console
     onError: () => {
@@ -122,28 +111,16 @@ const Post: FC<PostProps> = ({ post }) => {
     },
   });
 
-  // Helper to handle a like interaction
-  useEffect(
-    () => {
-      // Do not run on the first render
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
-      // Status message
-      liked
-        ? console.log('Liking the post!')
-        : console.log('Unliking the post!');
-      changeLikes();
-    },
-    [liked], // effect only activates when liked is updated
-  );
-
   // Handle user liking the post
   const handleLike = async () => {
     // Invert the like state
     setLiked(!liked);
-    // Rest of handling done in useEffect
+
+    // Status message
+    liked ? console.log('Liking the post!') : console.log('Unliking the post!');
+
+    // Like or unlike the post based on liked state
+    await changeLikes();
   };
   const handleBookmark = async () => {};
   const carouselConfig = {
@@ -171,50 +148,39 @@ const Post: FC<PostProps> = ({ post }) => {
         )}
       />
       <YStack display='flex' rowGap={'$1'} marginBottom={'$10'}>
-        {userId === author.split('/')[1] && (
-          <XStack display='flex' justifyContent='space-around'>
-            <EditPostDialog post={post} />
-            <DeletePostDialog postId={postId} />
-          </XStack>
-        )}
+        <EditPost post={post} />
         <XStack display='flex' justifyContent='center'>
-          <XStack alignItems='center' justifyContent='space-evenly'>
+          <XStack alignItems='center'>
             {/*Like*/}
-            <Button
-              size={'$4'}
-              circular
-              animation={'bouncy'}
-              animateOnly={['transform']}
-              icon={
-                <AntDesign
-                  size={22}
-                  name={liked ? 'heart' : 'hearto'}
-                  color={liked ? 'red' : 'black'}
-                />
-              }
-              justifyContent='center'
-              alignItems='center'
-              onPress={handleLike}
-              pressStyle={{ scale: 0.4 }}
-              padding={10}
-              unstyled
-            />
+            <ButtonIcon iconName={'heart'} onPress={handleLike} />
             {/*Display number of likes*/}
-            <Text>
-              {likesLoading ? 'Loading' : likesError ? '-1' : localLikes}
-            </Text>
+            {likesLoading ? (
+              <Text>Loading</Text>
+            ) : likesError ? (
+              <Text>-1</Text>
+            ) : (
+              <Text>{likesCount}</Text>
+            )}
           </XStack>
           {/*Comment*/}
           <ButtonIcon
-            iconName='comment-o'
+            iconName='comment'
             onPress={() => {
-              router.push('/(modals)/comments');
+              router.push({
+                pathname: '/(modals)/comments',
+                params: {
+                  comments: JSON.stringify(comments),
+                  post_id: JSON.stringify(key),
+                },
+              });
             }}
           />
           {/*Bookmark*/}
-          <ButtonIcon iconName='bookmark-o' onPress={handleBookmark} />
+          <ButtonIcon iconName='star' onPress={handleBookmark} />
           {/*Location*/}
-          {byte?.location && <ButtonIcon iconName='map-o' onPress={openMaps} />}
+          {byte?.location && (
+            <ButtonIcon iconName='location' onPress={openMaps} />
+          )}
         </XStack>
         {/*USER INFO*/}
         <YStack px={'$2.5'} gap={'$1'}>
